@@ -14,7 +14,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @Repository
 public class InMemoryUserRepository {
-    final private Map<Integer, User> users = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
     private final Set<String> allEmails = new HashSet<>();
 
     public User addUser(User user) {
