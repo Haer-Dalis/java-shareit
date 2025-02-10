@@ -24,4 +24,5 @@ public class UserMapper {
                 .name(userDto.getName())
                 .email(userDto.getEmail()).build();
     }
+
 }

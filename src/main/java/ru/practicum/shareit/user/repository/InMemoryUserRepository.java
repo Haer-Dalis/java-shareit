@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user.repository;
 
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -8,8 +7,6 @@ import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.util.*;
 
@@ -17,15 +14,17 @@ import java.util.*;
 @RequiredArgsConstructor
 @Repository
 public class InMemoryUserRepository {
-    private final UserMapper userMapper;
-    private Map<Integer, User> users = new HashMap<>();
+    final private Map<Integer, User> users = new HashMap<>();
+    private final Set<String> allEmails = new HashSet<>();
 
-    public User addUser(UserDto userDto) {
-        if (StringUtils.isBlank(userDto.getEmail())) {
+    public User addUser(User user) {
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new ValidationException("У пользователя отсутствует почта!");
         }
-        searchByMail(userDto.getEmail());
-        User user = userMapper.toUser(userDto);
+        if (allEmails.contains(user.getEmail())) {
+            throw new ConflictException("Такая почта уже существует: " + user.getEmail());
+        }
+        allEmails.add(user.getEmail());
         Integer id = generateId();
         user.setId(id);
         users.put(id, user);
@@ -33,23 +32,25 @@ public class InMemoryUserRepository {
         return user;
     }
 
-    public User updateUser(UserDto userDto, Integer userId) {
+    public User updateUser(User updatedUser, Integer userId) {
         User user = users.get(userId);
-
         if (user == null) {
             log.error("Пользователь с id {} не найден.", userId);
             throw new NotFoundException("Пользователь с id " + userId + " не найден.");
         }
 
-        if (userDto.getEmail() != null) {
-            searchByMail(userDto.getEmail());
-            user.setEmail(userDto.getEmail());
+        if (updatedUser.getEmail() != null && !updatedUser.getEmail().equals(user.getEmail())) {
+            if (allEmails.contains(updatedUser.getEmail())) {
+                throw new ConflictException("Такая почта уже существует: " + updatedUser.getEmail());
+            }
+            allEmails.add(updatedUser.getEmail());
+            allEmails.remove(user.getEmail());
+            user.setEmail(updatedUser.getEmail());
         }
 
-        if (userDto.getName() != null) {
-            user.setName(userDto.getName());
+        if (updatedUser.getName() != null) {
+            user.setName(updatedUser.getName());
         }
-
         log.info("Пользователь с id {} успешно обновлен", userId);
         return user;
 
@@ -62,6 +63,8 @@ public class InMemoryUserRepository {
             log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь с id " + userId + " не найден.");
         }
+
+        allEmails.remove(user.getEmail());
 
         log.info("Удален пользователь с id {} ", userId);
         return user;
@@ -83,12 +86,4 @@ public class InMemoryUserRepository {
         }
     }
 
-    public void searchByMail(String email) {
-        boolean emailExists = users.values().stream()
-                .anyMatch(user -> user.getEmail().equals(email));
-
-        if (emailExists) {
-            throw new ConflictException("Такая почта уже существует " + email);
-        }
-    }
 }
