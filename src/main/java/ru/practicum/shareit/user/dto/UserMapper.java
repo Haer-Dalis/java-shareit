@@ -6,7 +6,7 @@ import ru.practicum.shareit.user.User;
 
 @Component
 public class UserMapper {
-    public UserDto toUserDto(User user) {
+    public static UserDto toUserDto(User user) {
         if (user == null) {
             throw new NotFoundException("Пользователь не должен быть пустым");
         }

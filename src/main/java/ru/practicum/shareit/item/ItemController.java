@@ -1,9 +1,11 @@
 package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -28,8 +30,10 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Integer itemId) {
-        return itemService.getItem(itemId);
+    public ItemOutputDto getItem(
+            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Integer userId,
+            @Positive @PathVariable Integer itemId) {
+        return itemService.addBookingInfoAndComments(itemId, userId);
     }
 
     @GetMapping
@@ -41,6 +45,15 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam(name = "text") String searchQuery) {
         return itemService.search(searchQuery);
 
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentOutputDto addComment(
+            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Integer userId,
+            @Valid @RequestBody CommentDto commentDto,
+            @Positive @PathVariable Integer itemId) {
+        Comment comment = itemService.addComment(userId, CommentMapper.toComment(commentDto), itemId);
+        return CommentMapper.toCommentOutputDto(comment);
     }
 
 }
