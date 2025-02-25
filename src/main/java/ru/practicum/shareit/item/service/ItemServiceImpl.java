@@ -3,16 +3,14 @@ package ru.practicum.shareit.item.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.CommentMapper;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.dto.ItemOutputDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -30,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -40,6 +39,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public ItemDto addItem(Integer userId, ItemDto itemDto) {
         Item item = itemMapper.toItem(itemDto);
         User user = userMapper.toUser(userService.getUserById(userId));
@@ -49,6 +49,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto editItem(Integer userId, Integer itemId, ItemDto itemDto) {
         userService.getUserById(userId);
         Item existingItem = itemRepository.findById(itemId)
@@ -96,6 +97,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public void deleteItem(Integer ownerId, Integer itemId) {
         userService.getUserById(ownerId);
         Item item = itemMapper.toItem(getItem(itemId));
@@ -109,7 +111,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Comment addComment(Integer userId, Comment comment, Integer itemId) {
+    @Transactional
+    public CommentOutputDto addComment(Integer userId, CommentDto commentDto, Integer itemId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + userId));
         Item item = itemRepository.findById(itemId)
@@ -117,14 +120,16 @@ public class ItemServiceImpl implements ItemService {
         bookingRepository.findFirstByItemIdAndBookerIdAndStatusAndEndBefore(
                         itemId, userId, Status.APPROVED, LocalDateTime.now())
                 .orElseThrow(() -> new ValidationException("Пользователь " + userId + " не бронировал этот предмет"));
+        Comment comment = CommentMapper.toComment(commentDto);
         comment.setCreated(LocalDateTime.now());
         comment.setItem(item);
         comment.setAuthor(user);
         log.info("Добавлен комментарий: {}", comment);
-        return commentRepository.save(comment);
+        return CommentMapper.toCommentOutputDto(commentRepository.save(comment));
     }
 
     @Override
+    @Transactional
     public ItemOutputDto addBookingInfoAndComments(Integer itemId, Integer userId) {
         log.info("Обработка запроса: itemId={}, userId={}", itemId, userId);
         Item item = itemRepository.findById(itemId)

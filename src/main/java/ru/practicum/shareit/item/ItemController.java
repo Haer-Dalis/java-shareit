@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -48,12 +47,10 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentOutputDto addComment(
-            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Integer userId,
-            @Valid @RequestBody CommentDto commentDto,
-            @Positive @PathVariable Integer itemId) {
-        Comment comment = itemService.addComment(userId, CommentMapper.toComment(commentDto), itemId);
-        return CommentMapper.toCommentOutputDto(comment);
+    public CommentOutputDto addComment(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) Integer userId,
+                                       @Valid @RequestBody CommentDto commentDto,
+                                       @Positive @PathVariable Integer itemId) {
+        return itemService.addComment(userId, commentDto, itemId);
     }
 
 }
