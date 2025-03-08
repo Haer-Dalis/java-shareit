@@ -1,47 +1,94 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.repository.InMemoryUserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-    private final InMemoryUserRepository inMemoryUserRepository;
+    private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public UserDto addUser(UserDto userDto) {
+        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
+            throw new ValidationException("У пользователя отсутствует почта!");
+        }
+
+        checkEmail(userDto.getEmail(), null);
+
         User user = userMapper.toUser(userDto);
-        return userMapper.toUserDto(inMemoryUserRepository.addUser(user));
+
+        try {
+            return UserMapper.toUserDto(userRepository.save(user));
+        } catch (DataIntegrityViolationException error) {
+            throw new ConflictException("Пользователь с таким e-mail уже существует");
+        }
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(UserDto userDto, Integer userId) {
-        User user = userMapper.toUser(userDto);
-        return userMapper.toUserDto(inMemoryUserRepository.updateUser(user, userId));
+        User oldUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден."));
+
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(oldUser.getEmail())) {
+            checkEmail(userDto.getEmail(), userId);
+            oldUser.setEmail(userDto.getEmail());
+        }
+
+        if (userDto.getName() != null) {
+            oldUser.setName(userDto.getName());
+        }
+
+        log.debug("Пользователь с id {} успешно обновлен", userId);
+
+        userRepository.save(oldUser);
+        return UserMapper.toUserDto(oldUser);
     }
 
     @Override
+    @Transactional
     public UserDto deleteUser(Integer userId) {
-        return userMapper.toUserDto(inMemoryUserRepository.deleteUser(userId));
+        UserDto userDto = getUserById(userId);
+        userRepository.deleteById(userId);
+        log.info("Удален пользователь с id {} ", userId);
+        return userDto;
     }
 
     @Override
     public List<UserDto> getUsers() {
-        return inMemoryUserRepository.getUsers()
+        return userRepository.findAll()
                 .stream()
-                .map(userMapper::toUserDto)
+                .map(UserMapper::toUserDto)
                 .toList();
     }
 
     @Override
     public UserDto getUserById(Integer userId) {
-        return userMapper.toUserDto(inMemoryUserRepository.getUser(userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден."));
+        return UserMapper.toUserDto(user);
+    }
+
+    private void checkEmail(String email, Integer userId) {
+        if (userRepository.existsByEmailAndIdNot(email, userId)) {
+            throw new ConflictException("Пользователь с таким e-mail уже существует");
+        }
     }
 }
