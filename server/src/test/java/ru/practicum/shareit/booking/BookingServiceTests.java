@@ -12,6 +12,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnknownValueException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -29,6 +30,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -126,6 +128,19 @@ class BookingServiceTests {
     }
 
     @Test
+    void approveBookingAlreadyApproved() {
+        booking.setStatus(Status.APPROVED);
+        when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
+        assertThrows(ValidationException.class, () -> bookingService.approveBooking(user1.getId(), 1, true));
+    }
+
+    @Test
+    void approveBookingAccessDenied() {
+        when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
+        assertThrows(AccessDeniedException.class, () -> bookingService.approveBooking(user2.getId(), 1, true));
+    }
+
+    @Test
     void getByIdTesting() {
         when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
 
@@ -179,7 +194,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void getAllOwnerItemBookingsAll() {
+    void getAllOwnerItemBookingsAllTesting() {
         when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
         when(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(user1.getId())).thenReturn(List.of(booking));
 
@@ -191,10 +206,42 @@ class BookingServiceTests {
     }
 
     @Test
-    void getAllOwnerItemBookingsInvalidState() {
+    void getAllOwnerItemBookingsInvalidStateTesting() {
         when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
 
         assertThrows(UnknownValueException.class, () -> bookingService.getAllOwnerItemBookings(user1.getId(), "INVALID_STATE"));
+    }
+
+    @Test
+    void getAllUserBookingsCurrentTesting() {
+        LocalDateTime currentTime = LocalDateTime.now();
+        booking.setStart(currentTime.minusDays(1));
+        booking.setEnd(currentTime.plusDays(1));
+
+        when(userService.getUserById(user2.getId())).thenReturn(UserMapper.toUserDto(user2));
+        when(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartAsc(eq(user2.getId()), any(), any()))
+                .thenReturn(List.of(booking));
+
+        List<BookingOutputDto> result = bookingService.getAllUserBookings(user2.getId(), "CURRENT");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getAllOwnerItemBookingsCurrentTesting() {
+        LocalDateTime currentTime = LocalDateTime.now();
+        booking.setStart(currentTime.minusDays(1));
+        booking.setEnd(currentTime.plusDays(1));
+
+        when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
+        when(bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartAsc(eq(user1.getId()), any(), any()))
+                .thenReturn(List.of(booking));
+
+        List<BookingOutputDto> result = bookingService.getAllOwnerItemBookings(user1.getId(), "CURRENT");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 }
 
