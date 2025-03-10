@@ -8,5 +8,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByEmailAndIdNot(String email, Integer id);
+
     List<User> findByEmail(String email);
 }
