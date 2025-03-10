@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
@@ -106,5 +108,58 @@ class UserServiceTests {
         NotFoundException n =
                 assertThrows(NotFoundException.class, () -> userService.getUserById(1024));
         assertEquals("Пользователь с id 1024 не найден.", n.getMessage());
+    }
+
+    @Test
+    void addUserWithoutEmailThrowsValidationException() {
+        UserDto userDto = UserDto.builder()
+                .name("Ivan")
+                .email("")
+                .build();
+
+        ValidationException exception = assertThrows(ValidationException.class, () -> userService.addUser(userDto));
+        assertEquals("У пользователя отсутствует почта!", exception.getMessage());
+    }
+
+    @Test
+    void addUserWithExistingEmailThrowsConflictException() {
+        UserDto userDto1 = UserDto.builder()
+                .name("Ivan")
+                .email("Ivan@tupopochta.ru")
+                .build();
+        userService.addUser(userDto1);
+
+        UserDto userDto2 = UserDto.builder()
+                .name("Peter")
+                .email("Ivan@tupopochta.ru")
+                .build();
+
+        ConflictException exception = assertThrows(ConflictException.class, () -> userService.addUser(userDto2));
+        assertEquals("Пользователь с таким e-mail уже существует", exception.getMessage());
+    }
+
+    @Test
+    void updateUserWithSameDataDoesNotChangeUser() {
+        UserDto userDto = UserDto.builder()
+                .name("Ivan")
+                .email("Ivan@tupopochta.ru")
+                .build();
+        UserDto createdUser = userService.addUser(userDto);
+
+        UserDto updateUserDto = UserDto.builder()
+                .name("Ivan")
+                .email("Ivan@tupopochta.ru")
+                .build();
+
+        UserDto updatedUser = userService.updateUser(updateUserDto, createdUser.getId());
+
+        assertEquals(createdUser.getName(), updatedUser.getName());
+        assertEquals(createdUser.getEmail(), updatedUser.getEmail());
+    }
+
+    @Test
+    void deleteNonExistentUserThrowsNotFoundException() {
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(1024));
+        assertEquals("Пользователь с id 1024 не найден.", exception.getMessage());
     }
 }
