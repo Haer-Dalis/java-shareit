@@ -7,7 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.ShareItApp;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestOutputDto;
@@ -23,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Transactional
 @SpringBootTest
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@ContextConfiguration(classes = ShareItApp.class)
 public class RequestServiceTests {
 
     @Autowired
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
     UserDto user1;
     UserDto user2;
     UserDto user3;

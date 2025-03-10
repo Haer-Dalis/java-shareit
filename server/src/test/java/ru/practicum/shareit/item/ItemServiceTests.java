@@ -6,7 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import ru.practicum.shareit.ShareItApp;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -23,13 +28,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @SpringBootTest
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ContextConfiguration(classes = ShareItApp.class)
 class ItemServiceTests {
 
     @Autowired
-    private final EntityManager em;
+    private EntityManager em;
     private UserDto user1;
     private UserDto user2;
     private UserDto user3;
@@ -47,6 +52,9 @@ class ItemServiceTests {
     @Autowired
     private ItemServiceImpl itemService;
     private UserMapper userMapper;
+
+    ItemServiceTests() {
+    }
 
     @BeforeEach
     void setUp() {

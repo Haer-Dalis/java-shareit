@@ -1,8 +1,14 @@
 package ru.practicum.shareit.exception;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.test.context.ContextConfiguration;
+import ru.practicum.shareit.ShareItApp;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@JsonTest
+@ContextConfiguration(classes = ShareItApp.class)
 public class ErrorHandlerTest {
 
     private final ErrorHandler handler = new ErrorHandler();
