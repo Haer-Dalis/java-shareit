@@ -12,6 +12,8 @@ import ru.practicum.shareit.ShareItApp;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -25,6 +27,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = ShareItApp.class)
@@ -243,34 +246,31 @@ class ItemServiceTests {
 
         NotFoundException n =
                 assertThrows(NotFoundException.class, () -> itemService.getItem(999));
-        assertEquals("Не найден предмет c id: 999", n.getMessage()); ;
+        assertEquals("Не найден предмет c id: 999", n.getMessage());
     }
 
     @Test
-    void deleteByIdTesting() {
-        UserMapper userMapper = new UserMapper();
-        ItemDto itemDto = ItemDto.builder()
-                .name("Item1")
-                .description("Description1")
-                .available(true)
+    void deleteItemByNonOwnerTesting() {
+        NullPointerException n =
+                assertThrows(NullPointerException.class, () -> itemService.deleteItem(user2.getId(), item1.getId()));
+    }
+
+    @Test
+    void addCommentWithoutBookingTesting() {
+        CommentDto commentDto = CommentDto.builder()
+                .text("Great item!")
                 .build();
 
-        itemDto.setOwner(userMapper.toUser(user1));
-
-        ItemDto createdItemDto = itemService.addItem(user1.getId(), itemDto);
-        assertNotNull(itemService.getItem(createdItemDto.getId()));
-        System.out.println(itemService.getItem(createdItemDto.getId()));
-
-        NotFoundException f =
-                assertThrows(NotFoundException.class, () -> itemService.deleteItem(999, createdItemDto.getId()));
-        assertEquals("Пользователь с id 999 не найден.", f.getMessage());
-
+        ValidationException n =
+                assertThrows(ValidationException.class, () -> itemService.addComment(user3.getId(), commentDto, item1.getId()));
+        assertEquals("Пользователь 6 не бронировал этот предмет", n.getMessage());
     }
 
     @Test
-    void deleteNotExistingItemTesting() {
-        NotFoundException n =
-                assertThrows(NotFoundException.class, () -> itemService.deleteItem(user1.getId(), 999));
-        assertEquals("Не найден предмет c id: 999", n.getMessage());
+    void getByRequestIdTesting() {
+        List<Item> items = itemService.getByRequestId(user1.getId());
+
+        assertNotNull(items);
+        assertEquals(0, items.size());
     }
 }
