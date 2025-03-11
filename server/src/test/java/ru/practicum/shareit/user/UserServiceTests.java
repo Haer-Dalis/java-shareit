@@ -89,6 +89,57 @@ class UserServiceTests {
     }
 
     @Test
+    void updateUserPartialNameChangeTesting() {
+        UserDto userDto = UserDto.builder()
+                .name("Ivan")
+                .email("Ivan@tupopochta.ru")
+                .build();
+
+        UserDto createdUser = userService.addUser(userDto);
+
+        UserDto updateUserDto = UserDto.builder()
+                .name("New Ivan")
+                .email(null)
+                .build();
+
+        UserDto updatedUser = userService.updateUser(updateUserDto, createdUser.getId());
+
+        assertEquals("New Ivan", updatedUser.getName());
+        assertEquals("Ivan@tupopochta.ru", updatedUser.getEmail());
+    }
+
+    @Test
+    void updateUserPartialEmailChangeTesting() {
+        UserDto userDto = UserDto.builder()
+                .name("Ivan")
+                .email("Ivan@tupopochta.ru")
+                .build();
+
+        UserDto createdUser = userService.addUser(userDto);
+
+        UserDto updateUserDto = UserDto.builder()
+                .name(null)
+                .email("new.ivan@tupopochta.ru")
+                .build();
+
+        UserDto updatedUser = userService.updateUser(updateUserDto, createdUser.getId());
+
+        assertEquals("Ivan", updatedUser.getName());
+        assertEquals("new.ivan@tupopochta.ru", updatedUser.getEmail());
+    }
+
+    @Test
+    void updateNonExistentUserThrowsNotFoundExceptionTesting() {
+        UserDto updateUserDto = UserDto.builder()
+                .name("Ghost User")
+                .email("ghost@tupopochta.ru")
+                .build();
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.updateUser(updateUserDto, 9999));
+        assertEquals("Пользователь с id 9999 не найден.", exception.getMessage());
+    }
+
+    @Test
     void deleteByIdTesting() {
         UserDto userDto = UserDto.builder()
                 .name("Ivan")
@@ -104,14 +155,14 @@ class UserServiceTests {
     }
 
     @Test
-    void findByIdFailureTesting() {
+    void findByIdFailureTestingTesting() {
         NotFoundException n =
                 assertThrows(NotFoundException.class, () -> userService.getUserById(1024));
         assertEquals("Пользователь с id 1024 не найден.", n.getMessage());
     }
 
     @Test
-    void addUserWithoutEmailThrowsValidationException() {
+    void addUserWithoutEmailThrowsValidationExceptionTesting() {
         UserDto userDto = UserDto.builder()
                 .name("Ivan")
                 .email("")
@@ -122,7 +173,7 @@ class UserServiceTests {
     }
 
     @Test
-    void addUserWithExistingEmailThrowsConflictException() {
+    void addUserWithExistingEmailThrowsConflictExceptionTesting() {
         UserDto userDto1 = UserDto.builder()
                 .name("Ivan")
                 .email("Ivan@tupopochta.ru")
@@ -139,7 +190,7 @@ class UserServiceTests {
     }
 
     @Test
-    void updateUserWithSameDataDoesNotChangeUser() {
+    void updateUserWithSameDataDoesNotChangeUserTesting() {
         UserDto userDto = UserDto.builder()
                 .name("Ivan")
                 .email("Ivan@tupopochta.ru")
@@ -158,7 +209,7 @@ class UserServiceTests {
     }
 
     @Test
-    void deleteNonExistentUserThrowsNotFoundException() {
+    void deleteNonExistentUserThrowsNotFoundExceptionTesting() {
         NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(1024));
         assertEquals("Пользователь с id 1024 не найден.", exception.getMessage());
     }
