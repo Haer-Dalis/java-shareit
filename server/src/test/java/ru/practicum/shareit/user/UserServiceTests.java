@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,11 +15,11 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,6 +34,14 @@ class UserServiceTests {
     private UserRepository userRepository;
     @Autowired
     private UserService userService;
+    private User user;
+    private UserDto userDto;
+
+    @BeforeEach
+    void setUp() {
+        user = new User(1, "John Doe", "john.doe@example.com");
+        userDto = UserDto.builder().id(1).name("John Doe").email("john.doe@example.com").build();
+    }
 
     @Test
     void findByIdSuccessTesting() {
@@ -213,4 +222,28 @@ class UserServiceTests {
         NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(1024));
         assertEquals("Пользователь с id 1024 не найден.", exception.getMessage());
     }
+
+    @Test
+    void getUsersTesting() {
+        UserDto userDto1 = UserDto.builder()
+                .name("Ivan")
+                .email("Ivan@tupopochta.ru")
+                .build();
+        UserDto userDto2 = UserDto.builder()
+                .name("Peter")
+                .email("Peter@tupopochta.ru")
+                .build();
+
+        userService.addUser(userDto1);
+        userService.addUser(userDto2);
+
+        List<UserDto> users = userService.getUsers();
+
+        assertThat(users, hasSize(2));
+        assertThat(users, containsInAnyOrder(
+                hasProperty("name", equalTo("Ivan")),
+                hasProperty("name", equalTo("Peter"))
+        ));
+    }
+
 }

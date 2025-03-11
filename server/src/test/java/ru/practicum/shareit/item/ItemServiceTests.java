@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import ru.practicum.shareit.ShareItApp;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -18,7 +19,9 @@ import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentOutputDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
@@ -46,8 +49,8 @@ class ItemServiceTests {
     private UserDto user1;
     private UserDto user2;
     private UserDto user3;
-    UserDto userDto1;
-    ItemDto itemDto1;
+    private UserDto userDto1;
+    private ItemDto itemDto1;
     private ItemDto item1;
     private ItemDto item2;
     private ItemDto item3;
@@ -301,7 +304,7 @@ class ItemServiceTests {
     }
 
     @Test
-    void addCommentwhenUserNotFoundthenThrowNotFoundExceptionTesting() {
+    void addCommentUserNotFoundThrowNotFoundExceptionTesting() {
         Integer userId = 1;
         Integer itemId = 1;
         CommentDto commentDto = new CommentDto("Nice item!");
@@ -367,7 +370,7 @@ class ItemServiceTests {
     }
 
     @Test
-    void getItemById_ExistingItem() {
+    void getItemByIdExistingItem() {
         when(itemRepository.findById(1)).thenReturn(Optional.of(item));
         ItemDto foundItem = itemService.getItem(1);
         assertNotNull(foundItem);
@@ -383,7 +386,7 @@ class ItemServiceTests {
     }
 
     @Test
-    void searchItems_WithQuery() {
+    void searchItemsWithQuery() {
         List<Item> items = List.of(item);
         when(itemRepository.search("Item1")).thenReturn(items);
         List<ItemDto> result = itemService.search("Item1");
@@ -391,7 +394,7 @@ class ItemServiceTests {
     }
 
     @Test
-    void searchItems_EmptyQuery() {
+    void searchItemsEmptyQuery() {
         List<ItemDto> result = itemService.search("");
         assertTrue(result.isEmpty());
     }
@@ -408,5 +411,31 @@ class ItemServiceTests {
         ItemDto foundItem = itemService.getItem(1);
         assertNotNull(foundItem);
     }
+
+    @Test
+    void searchItemsBlankTextTesting() {
+        List<ItemDto> testItemList = itemService.search("     ");
+        assertTrue(testItemList.isEmpty());
+        verify(itemRepository, times(0)).search(anyString());
+    }
+
+    @Test
+    void addCommentWithoutBookingThrowsValidationException() {
+        CommentDto commentDto = CommentDto.builder()
+                .text("Nice item!")
+                .build();
+
+        when(userRepository.findById(user1.getId())).thenReturn(Optional.of(new User()));
+        when(itemRepository.findById(item1.getId())).thenReturn(Optional.of(new Item()));
+        when(bookingRepository.findFirstByItemIdAndBookerIdAndStatusAndEndBefore(
+                eq(item1.getId()), eq(user1.getId()), eq(Status.APPROVED), any(LocalDateTime.class)))
+                .thenReturn(Optional.empty());
+
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                itemService.addComment(user1.getId(), commentDto, item1.getId()));
+
+        assertEquals("Пользователь " + user1.getId() + " не бронировал этот предмет", exception.getMessage());
+    }
+
 }
 
