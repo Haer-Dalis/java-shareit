@@ -53,6 +53,11 @@ class BookingServiceTests {
     private Booking booking;
     private BookingDto bookingInputDto;
     private BookingOutputDto bookingOutputDto;
+    private Booking currentBooking;
+    private Booking pastBooking;
+    private Booking futureBooking;
+    private Booking waitingBooking;
+    private Booking rejectedBooking;
 
     @BeforeEach
     void setUp() {
@@ -92,6 +97,12 @@ class BookingServiceTests {
                 UserMapper.toUserDto(user2),
                 ItemMapper.toItemOutputDto(item1)
         );
+        LocalDateTime now = LocalDateTime.now();
+        currentBooking = new Booking(1, now.minusDays(1), now.plusDays(1), item1, user1, Status.APPROVED);
+        pastBooking = new Booking(2, now.minusDays(10), now.minusDays(5), item1, user1, Status.APPROVED);
+        futureBooking = new Booking(3, now.plusDays(5), now.plusDays(10), item1, user1, Status.APPROVED);
+        waitingBooking = new Booking(4, now.plusDays(1), now.plusDays(2), item1, user1, Status.WAITING);
+        rejectedBooking = new Booking(5, now.plusDays(3), now.plusDays(4), item1, user1, Status.REJECTED);
     }
 
     @Test
@@ -242,6 +253,191 @@ class BookingServiceTests {
 
         assertNotNull(result);
         assertEquals(1, result.size());
+    }
+
+    @Test
+    void addBookingWithNullItemIdThrowsValidationException() {
+        BookingDto bookingDto = new BookingDto(null, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), Status.WAITING);
+
+        assertThrows(ValidationException.class, () -> bookingService.addBooking(user1.getId(), bookingDto));
+    }
+
+    @Test
+    void addBookingWhenItemNotAvailableThrowsNotFoundExceptionTesting() {
+        item1.setAvailable(false);
+        when(itemRepository.findById(item1.getId())).thenReturn(Optional.of(item1));
+
+        BookingDto bookingDto = new BookingDto(item1.getId(), LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), Status.WAITING);
+
+        assertThrows(NotFoundException.class, () -> bookingService.addBooking(user2.getId(), bookingDto));
+    }
+
+    @Test
+    void addBookingByOwnerThrowsNotFoundExceptionTesting() {
+        when(itemRepository.findById(item1.getId())).thenReturn(Optional.of(item1));
+
+        BookingDto bookingDto = new BookingDto(item1.getId(), LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), Status.WAITING);
+
+        assertThrows(NotFoundException.class, () -> bookingService.addBooking(user1.getId(), bookingDto));
+    }
+
+    @Test
+    void approveBookingWithFalseRejectsBookingTesting() {
+        booking.setStatus(Status.WAITING);
+        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any())).thenReturn(booking);
+
+        BookingOutputDto updatedBooking = bookingService.approveBooking(user1.getId(), booking.getId(), false);
+
+        assertEquals(Status.REJECTED, updatedBooking.getStatus());
+    }
+
+    @Test
+    void getAllUserBookingsByStateTesting() {
+        when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
+
+        when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(eq(user1.getId()), any()))
+                .thenReturn(List.of(booking));
+        List<BookingOutputDto> pastBookings = bookingService.getAllUserBookings(user1.getId(), "PAST");
+        assertEquals(1, pastBookings.size());
+
+        when(bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(eq(user1.getId()), any()))
+                .thenReturn(List.of());
+        List<BookingOutputDto> futureBookings = bookingService.getAllUserBookings(user1.getId(), "FUTURE");
+        assertTrue(futureBookings.isEmpty());
+    }
+
+    @Test
+    void getAllOwnerItemBookingsByStateTesting() {
+        when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
+
+        when(bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(eq(user1.getId()), any()))
+                .thenReturn(List.of(booking));
+        List<BookingOutputDto> pastBookings = bookingService.getAllOwnerItemBookings(user1.getId(), "PAST");
+        assertEquals(1, pastBookings.size());
+
+        when(bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartAsc(eq(user1.getId()), any(), any()))
+                .thenReturn(List.of());
+        List<BookingOutputDto> currentBookings = bookingService.getAllOwnerItemBookings(user1.getId(), "CURRENT");
+        assertTrue(currentBookings.isEmpty());
+    }
+
+    @Test
+    void getAllUserBookingsByStateAllTesting() {
+        when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
+        when(bookingRepository.findAllByBookerIdOrderByStartDesc(user1.getId())).thenReturn(List.of(booking));
+
+        List<BookingOutputDto> allBookings = bookingService.getAllUserBookings(user1.getId(), "ALL");
+        assertEquals(1, allBookings.size());
+    }
+
+    @Test
+    void getAllUserBookingsByStateWaitingTesting() {
+        when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
+        when(bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(user1.getId(), Status.WAITING))
+                .thenReturn(List.of(booking));
+
+        List<BookingOutputDto> waitingBookings = bookingService.getAllUserBookings(user1.getId(), "WAITING");
+        assertEquals(1, waitingBookings.size());
+    }
+
+    @Test
+    void getAllUserBookingsByStateRejectedTesting() {
+        when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
+        when(bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(user1.getId(), Status.REJECTED))
+                .thenReturn(List.of(booking));
+
+        List<BookingOutputDto> rejectedBookings = bookingService.getAllUserBookings(user1.getId(), "REJECTED");
+        assertEquals(1, rejectedBookings.size());
+    }
+
+    @Test
+    void getAllUserBookingsByStateThrowsExceptionTesting() {
+        when(userService.getUserById(user1.getId())).thenReturn(UserMapper.toUserDto(user1));
+
+        Exception exception = assertThrows(UnknownValueException.class,
+                () -> bookingService.getAllUserBookings(user1.getId(), "INVALID_STATE"));
+    }
+
+    @Test
+    void getAllOwnerItemBookingsByStateAllTesting() {
+        when(userService.getUserById(item1.getOwner().getId())).thenReturn(UserMapper.toUserDto(item1.getOwner()));
+        when(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(item1.getOwner().getId())).thenReturn(List.of(booking));
+
+        List<BookingOutputDto> allBookings = bookingService.getAllOwnerItemBookings(item1.getOwner().getId(), "ALL");
+        assertEquals(1, allBookings.size());
+    }
+
+    @Test
+    void getAllOwnerItemBookingsByStateWaitingTesting() {
+        when(userService.getUserById(item1.getOwner().getId())).thenReturn(UserMapper.toUserDto(item1.getOwner()));
+        when(bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(item1.getOwner().getId(), Status.WAITING))
+                .thenReturn(List.of(booking));
+
+        List<BookingOutputDto> waitingBookings = bookingService.getAllOwnerItemBookings(item1.getOwner().getId(), "WAITING");
+        assertEquals(1, waitingBookings.size());
+    }
+
+    @Test
+    void getAllOwnerItemBookingsByStateThrowsExceptionTesting() {
+        when(userService.getUserById(item1.getOwner().getId())).thenReturn(UserMapper.toUserDto(item1.getOwner()));
+
+        Exception exception = assertThrows(UnknownValueException.class,
+                () -> bookingService.getAllOwnerItemBookings(item1.getOwner().getId(), "INVALID_STATE"));
+    }
+
+    @Test
+    void getAllOwnerItemBookingsByStateRejectedTesting() {
+        when(userService.getUserById(item1.getOwner().getId())).thenReturn(UserMapper.toUserDto(item1.getOwner()));
+        when(bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(item1.getOwner().getId(), Status.REJECTED))
+                .thenReturn(List.of(booking));
+
+        List<BookingOutputDto> rejectedBookings = bookingService.getAllOwnerItemBookings(item1.getOwner().getId(), "REJECTED");
+        assertEquals(1, rejectedBookings.size());
+    }
+
+    @Test
+    void getAllUserBookingsPastTesting() {
+        when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(eq(user1.getId()), any()))
+                .thenReturn(List.of(pastBooking));
+
+        List<BookingOutputDto> result = bookingService.getAllUserBookings(user1.getId(), "PAST");
+
+        assertEquals(1, result.size());
+        assertEquals(pastBooking.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void getAllUserBookingsFutureTesting() {
+        when(bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(eq(user1.getId()), any()))
+                .thenReturn(List.of(futureBooking));
+
+        List<BookingOutputDto> result = bookingService.getAllUserBookings(user1.getId(), "FUTURE");
+
+        assertEquals(1, result.size());
+        assertEquals(futureBooking.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void getAllUserBookingsWaitingTesting() {
+        when(bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(user1.getId(), Status.WAITING))
+                .thenReturn(List.of(waitingBooking));
+
+        List<BookingOutputDto> result = bookingService.getAllUserBookings(user1.getId(), "WAITING");
+
+        assertEquals(1, result.size());
+        assertEquals(waitingBooking.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void getAllUserBookingsRejectedTesting() {
+        when(bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(user1.getId(), Status.REJECTED))
+                .thenReturn(List.of(rejectedBooking));
+
+        List<BookingOutputDto> result = bookingService.getAllUserBookings(user1.getId(), "REJECTED");
+
+        assertEquals(1, result.size());
+        assertEquals(rejectedBooking.getId(), result.get(0).getId());
     }
 }
 
