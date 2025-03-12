@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingDto {
+public class CreateBookingDto {
 
-    private Long id;
+    private Long itemId;
 
     @NotNull
     @FutureOrPresent
@@ -25,4 +25,3 @@ public class BookingDto {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime end;
 }
-
