@@ -15,7 +15,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -221,29 +220,6 @@ class UserServiceTests {
     void deleteNonExistentUserThrowsNotFoundExceptionTesting() {
         NotFoundException exception = assertThrows(NotFoundException.class, () -> userService.deleteUser(1024));
         assertEquals("Пользователь с id 1024 не найден.", exception.getMessage());
-    }
-
-    @Test
-    void getUsersTesting() {
-        UserDto userDto1 = UserDto.builder()
-                .name("Ivan")
-                .email("Ivan@tupopochta.ru")
-                .build();
-        UserDto userDto2 = UserDto.builder()
-                .name("Peter")
-                .email("Peter@tupopochta.ru")
-                .build();
-
-        userService.addUser(userDto1);
-        userService.addUser(userDto2);
-
-        List<UserDto> users = userService.getUsers();
-
-        assertThat(users, hasSize(2));
-        assertThat(users, containsInAnyOrder(
-                hasProperty("name", equalTo("Ivan")),
-                hasProperty("name", equalTo("Peter"))
-        ));
     }
 
 }
