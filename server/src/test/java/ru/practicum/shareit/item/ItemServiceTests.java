@@ -186,7 +186,6 @@ class ItemServiceTests {
 
     @Test
     void addCommentTesting() {
-        // Подготовка данных
         Integer userId = 1;
         Integer itemId = 2;
         CommentDto commentDto = new CommentDto("Great item!");
@@ -208,11 +207,7 @@ class ItemServiceTests {
                 eq(itemId), eq(userId), eq(Status.APPROVED), any(LocalDateTime.class)))
                 .thenReturn(Optional.of(booking));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-
-        // Выполнение метода
         CommentOutputDto result = itemService.addComment(userId, commentDto, itemId);
-
-        // Проверка результата
         assertNotNull(result);
         assertEquals(commentDto.getText(), result.getText());
     }
