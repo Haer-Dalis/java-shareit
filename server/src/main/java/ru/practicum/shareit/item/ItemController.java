@@ -17,7 +17,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto addNewItem(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) Integer userId,
-                              @Valid @RequestBody ItemDto itemDto) {
+                              @RequestBody ItemDto itemDto) {
         return itemService.addItem(userId, itemDto);
     }
 
