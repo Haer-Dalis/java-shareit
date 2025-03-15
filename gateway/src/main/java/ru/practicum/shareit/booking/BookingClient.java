@@ -11,8 +11,6 @@ import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.client.BaseClient;
 
-import java.util.Map;
-
 @Service
 public class BookingClient extends BaseClient {
 
@@ -33,13 +31,8 @@ public class BookingClient extends BaseClient {
         return get("/" + bookingId, userId);
     }
 
-    public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
-        return get("?state={state}&from={from}&size={size}", userId, parameters);
+    public ResponseEntity<Object> getBookings(long userId, BookingState state) {
+        return get("?state=" + state.name(), userId);
     }
 
     public ResponseEntity<Object> createBooking(long userId, CreateBookingDto requestDto) {
@@ -47,20 +40,10 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> processBooking(long userId, long bookingId, boolean approved) {
-        Map<String, Object> params = Map.of(
-                "approved", approved,
-                "bookingId", bookingId
-        );
-        return patch("/{bookingId}?approved={approved}", userId, params, null);
+        return patch("/" + bookingId + "?approved=" + approved, userId);
     }
 
-    public ResponseEntity<Object> findByOwner(long ownerId, BookingState state,
-                                              int from, int size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
-        return get("/owner?state={state}&from={from}&size={size}", ownerId, parameters);
+    public ResponseEntity<Object> findByOwner(long ownerId, BookingState state) {
+        return get("/owner?state=" + state.name(), ownerId);
     }
 }
