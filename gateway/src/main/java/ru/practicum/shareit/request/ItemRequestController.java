@@ -2,7 +2,6 @@ package ru.practicum.shareit.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -35,18 +34,14 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getAllRequests(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
-                                                 @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                 @Positive @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> getAllRequests(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId) {
         log.info("Пользователь с id {} запрашивает список всех бронирований", userId);
-        return itemRequestClient.getAllRequests(userId, from, size);
+        return itemRequestClient.getAllByUser(userId);
     }
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getRequest(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
                                              @Positive @PathVariable("requestId") Long requestId) {
-        log.info("Пользователь с id {} запрашивает запрос бронирования с id {}", userId, requestId);
-        log.info("Пользователь с id {} просматривает запрос с id: {}", userId, requestId);
         return itemRequestClient.getRequestById(userId, requestId);
     }
 

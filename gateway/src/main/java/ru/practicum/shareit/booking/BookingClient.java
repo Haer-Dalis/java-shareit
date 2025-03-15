@@ -11,6 +11,9 @@ import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.client.BaseClient;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class BookingClient extends BaseClient {
 
@@ -27,20 +30,22 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getBooking(long userId, Long bookingId) {
+    public ResponseEntity<Object> getBooking(Long userId, Long bookingId) {
         return get("/" + bookingId, userId);
     }
 
-    public ResponseEntity<Object> getBookings(long userId, BookingState state) {
-        return get("?state=" + state.name(), userId);
+    public ResponseEntity<Object> getBookings(Long userId, String state) {
+        return get("?state=" + state, userId);
     }
 
     public ResponseEntity<Object> createBooking(long userId, CreateBookingDto requestDto) {
         return post("", userId, requestDto);
     }
 
-    public ResponseEntity<Object> processBooking(long userId, long bookingId, boolean approved) {
-        return patch("/" + bookingId + "?approved=" + approved, userId);
+    public ResponseEntity<Object> processBooking(Long userId, Long bookingId, Boolean approved) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("approved", approved);
+        return patch("/" + bookingId + "?approved={approved}", userId, params, null);
     }
 
     public ResponseEntity<Object> findByOwner(long ownerId, BookingState state) {

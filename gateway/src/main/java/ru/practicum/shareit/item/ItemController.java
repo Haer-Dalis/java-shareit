@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -47,21 +47,15 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllOwnerItems(
-            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
-            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size) {
-        log.info("Пользователь {} запросил список своих вещей", userId);
-        return itemClient.getItemsUser(userId, from, size);
+    public ResponseEntity<Object> getAllItems(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId) {
+        return itemClient.getAllItems(userId);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchItems(
-            @RequestParam(defaultValue = "") String text,
-            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size) {
+    public ResponseEntity<Object> searchItems(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
+                                              @NotNull @RequestParam String text) {
         log.info("Запущен поиск по тексту: {}", text);
-        return itemClient.searchItem(text, from, size);
+        return itemClient.searchItems(userId, text);
     }
 
     @DeleteMapping("/{itemId}")

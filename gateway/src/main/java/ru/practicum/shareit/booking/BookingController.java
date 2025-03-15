@@ -23,7 +23,7 @@ public class BookingController {
                                              @RequestParam(name = "state", defaultValue = "ALL") String stateParam) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-        return bookingClient.getBookings(userId, state);
+        return bookingClient.getBookings(userId, stateParam);
     }
 
     @PostMapping
