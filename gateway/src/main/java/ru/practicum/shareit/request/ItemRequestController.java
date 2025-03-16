@@ -29,7 +29,7 @@ public class ItemRequestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(errorMessage));
         }
     }
-    
+
     @GetMapping
     public ResponseEntity<Object> getAll(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId) {
         return itemRequestClient.getAllRequests(userId);
