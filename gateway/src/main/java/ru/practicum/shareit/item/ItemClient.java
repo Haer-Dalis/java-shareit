@@ -10,7 +10,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoUpdate;
 
 import java.util.Map;
 
@@ -19,7 +18,8 @@ public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
     @Autowired
-    public ItemClient(@Value("${shareIt-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public ItemClient(@Value("${shareit-server.url}") String serverUrl,
+                      RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
@@ -28,27 +28,33 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getItems(Integer userId) {
+    public ResponseEntity<Object> addItem(Long userId, ItemDto itemDto) {
+        return post("", userId, itemDto);
+    }
+
+    public ResponseEntity<Object> updateItem(Long userId, Long itemId, ItemDto itemDto) {
+        return patch("/" + itemId, userId, itemDto);
+    }
+
+    public ResponseEntity<Object> getItemById(Long itemId, Long userId) {
+        return get("/" + itemId, userId);
+    }
+
+    public ResponseEntity<Object> getAllItems(long userId) {
         return get("", userId);
-    }
-
-    public ResponseEntity<Object> addItem(ItemDto item, Integer userId) {
-        return post("", userId, item);
-    }
-
-    public ResponseEntity<Object> findItemById(Integer itemId) {
-        return get("/" + itemId);
-    }
-
-    public ResponseEntity<Object> updateItem(ItemDtoUpdate item, Integer itemId, Integer userId) {
-        return patch("/" + itemId, userId, item);
     }
 
     public ResponseEntity<Object> searchItems(long userId, String text) {
         return get("/search?text={text}", userId, Map.of("text", text));
     }
 
-    public ResponseEntity<Object> addComment(Integer itemId, Integer userId, CommentDto text) {
-        return post("/" + itemId + "/comment", userId, text);
+    public ResponseEntity<Object> deleteItem(Long userId, Long itemId) {
+        return delete("/" + itemId, userId);
     }
+
+    public ResponseEntity<Object> addComment(Long userId, Long itemId, CommentDto commentDto) {
+        return post("/" + itemId + "/comment", userId, commentDto);
+    }
+
 }
+
