@@ -22,23 +22,12 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @PostMapping
-    public ItemRequestOutputDto addRequest(@RequestHeader(SHARER_ID_HEADER) Integer userId,
+    public ItemRequestOutputDto addRequest(@RequestHeader(SHARER_ID_HEADER) Long userId,
                                            @RequestBody ItemRequestDto itemRequestDto) {
         log.info("Полученное DTO: {}", itemRequestDto);
 
-        if (userId == null) {
-            throw new IllegalArgumentException("userId не должен быть null (service)");
-        }
-        if (itemRequestDto == null) {
-            throw new IllegalArgumentException("itemRequestDto не должен быть null (service)");
-        }
-
-        try {
-            return itemRequestService.addRequest(itemRequestDto, userId);
-        } catch (Exception e) {
-            log.error("Ошибка в addRequest (service). userId: {}, DTO: {}", userId, itemRequestDto, e);
-            throw new RuntimeException("Ошибка в сервисе при добавлении запроса", e);
-        }
+        Integer userIdInt = Math.toIntExact(userId);
+        return itemRequestService.addRequest(itemRequestDto, userIdInt);
     }
 
     @GetMapping
