@@ -23,7 +23,20 @@ public class ItemRequestController {
     public ResponseEntity<Object> addRequest(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
                                              @RequestBody ItemRequestDto itemRequestDto) {
         log.info("Пользователь с id {} добавил запрос бронирования", userId);
-        return itemRequestClient.addRequest(userId, itemRequestDto);
+
+        if (userId == null) {
+            throw new IllegalArgumentException("userId не должен быть null");
+        }
+        if (itemRequestDto == null) {
+            throw new IllegalArgumentException("itemRequestDto не должен быть null");
+        }
+
+        try {
+            return itemRequestClient.addRequest(userId, itemRequestDto);
+        } catch (Exception e) {
+            log.error("Ошибка в addRequest (контроллер). userId: {}, DTO: {}", userId, itemRequestDto, e);
+            throw new RuntimeException("Ошибка при добавлении запроса в контроллере", e);
+        }
     }
 
     @GetMapping
