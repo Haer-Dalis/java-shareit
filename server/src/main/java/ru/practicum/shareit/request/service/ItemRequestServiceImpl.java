@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,11 +36,18 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional
     public ItemRequestOutputDto addRequest(ItemRequestDto itemRequestDto, Integer userId) {
+        log.info("Получен запрос на добавление запроса от пользователя с id: {}", userId);
         User user = userMapper.toUser(userService.getUserById(userId));
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto);
         itemRequest.setRequester(user);
         itemRequest.setCreated(LocalDateTime.now());
-        itemRequest =  itemRequestRepository.save(itemRequest);
+        try {
+            itemRequest = itemRequestRepository.save(itemRequest);
+            log.info("Запрос успешно сохранен в базу данных: {}", itemRequest);
+        } catch (Exception e) {
+            log.error("Ошибка при сохранении запроса в базу данных: {}", e.getMessage(), e);
+            throw new RuntimeException("Ошибка при сохранении запроса", e);
+        }
         return ItemRequestMapper.toItemRequestOutDto(itemRequest);
     }
 
