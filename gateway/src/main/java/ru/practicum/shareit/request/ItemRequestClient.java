@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -11,7 +10,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
-@Slf4j
 @Service
 public class ItemRequestClient extends BaseClient {
     private static final String API_PREFIX = "/requests";
@@ -30,7 +28,7 @@ public class ItemRequestClient extends BaseClient {
         return post("", userId, item);
     }
 
-    public ResponseEntity<Object> getRequests(Long userId) {
+    public ResponseEntity<Object> getAllRequests(long userId) {
         return get("", userId);
     }
 
@@ -38,8 +36,7 @@ public class ItemRequestClient extends BaseClient {
         return get("/all", userId);
     }
 
-    public ResponseEntity<Object> getRequestById(Long userId, Long requestId) {
+    public ResponseEntity<Object> getItemRequest(long userId, long requestId) {
         return get("/" + requestId, userId);
     }
-
 }

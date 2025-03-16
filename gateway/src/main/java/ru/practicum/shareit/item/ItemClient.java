@@ -18,7 +18,7 @@ public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
     @Autowired
-    public ItemClient(@Value("${shareIt-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public ItemClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
@@ -27,16 +27,15 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> addItem(Long userId, ItemDto item) {
-        return post("", userId, item);
+    public ResponseEntity<Object> addItem(long userId, ItemDto itemDto) {
+        return post("", userId, itemDto);
     }
 
-
-    public ResponseEntity<Object> updateItem(Long userId, Long itemId, ItemDto itemDto) {
+    public ResponseEntity<Object> updateItem(long userId, long itemId, ItemDto itemDto) {
         return patch("/" + itemId, userId, itemDto);
     }
 
-    public ResponseEntity<Object> getItemById(Long itemId, Long userId) {
+    public ResponseEntity<Object> getItem(long userId, long itemId) {
         return get("/" + itemId, userId);
     }
 
@@ -48,13 +47,8 @@ public class ItemClient extends BaseClient {
         return get("/search?text={text}", userId, Map.of("text", text));
     }
 
-    public ResponseEntity<Object> deleteItem(Long userId, Long itemId) {
-        return delete("/" + itemId, userId);
-    }
-
-    public ResponseEntity<Object> addComment(Long userId, Long itemId, CommentDto commentDto) {
+    public ResponseEntity<Object> createComment(long userId, long itemId, CommentDto commentDto) {
         return post("/" + itemId + "/comment", userId, commentDto);
     }
-
 }
 

@@ -1,14 +1,16 @@
 package ru.practicum.shareit.request.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder(toBuilder = true)
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRequestDto {
-    @NotBlank(message = "Описание запроса не может быть пустым")
-    @Setter(AccessLevel.PRIVATE)
-    private String description;
+    @NotNull
+    String description;
+    String created;
 }
