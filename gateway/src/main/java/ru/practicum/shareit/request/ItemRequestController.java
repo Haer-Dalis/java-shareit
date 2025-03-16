@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ public class ItemRequestController {
 
     @PostMapping
     public ResponseEntity<Object> addRequest(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
-                                             @Valid @RequestBody ItemRequestDto itemRequestDto) {
+                                             @RequestBody ItemRequestDto itemRequestDto) {
         log.info("Пользователь с id {} добавил запрос бронирования", userId);
         return itemRequestClient.addRequest(userId, itemRequestDto);
     }
