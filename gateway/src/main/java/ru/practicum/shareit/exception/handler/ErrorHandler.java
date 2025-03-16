@@ -33,9 +33,9 @@ public class ErrorHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleAllExceptions(final Exception exception) {
-        log.error("Необработанная ошибка: ", exception);
-        return new ErrorResponse("Внутренняя ошибка сервера: " + exception.getMessage());
+    public ErrorResponse handleAllExceptions(Exception exception) {
+        log.error("Ошибка 500: {}", exception.getMessage(), exception);
+        return new ErrorResponse("Внутренняя ошибка сервера в " + exception.getStackTrace()[0].getClassName() + ": " + exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

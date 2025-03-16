@@ -3,10 +3,12 @@ package ru.practicum.shareit.request;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.HeaderConstants;
+import ru.practicum.shareit.exception.handler.ErrorResponse;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 @RestController
@@ -20,9 +22,13 @@ public class ItemRequestController {
     @PostMapping
     public ResponseEntity<Object> createItemRequest(@Valid @RequestBody ItemRequestDto itemRequestDto,
                                                     @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId) {
-        return itemRequestClient.addRequest(userId, itemRequestDto);
+        try {
+            return itemRequestClient.addRequest(userId, itemRequestDto);
+        } catch (Exception e) {
+            String errorMessage = "Ошибка в createItemRequest (Controller): " + e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(errorMessage));
+        }
     }
-
     @GetMapping
     public ResponseEntity<Object> getAll(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId) {
         return itemRequestClient.getAllRequests(userId);

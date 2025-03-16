@@ -25,7 +25,11 @@ public class ItemRequestClient extends BaseClient {
     }
 
     public ResponseEntity<Object> addRequest(long userId, ItemRequestDto item) {
-        return post("", userId, item);
+        try {
+            return post("", userId, item);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка в addRequest (Client): " + e.getMessage());
+        }
     }
 
     public ResponseEntity<Object> getAllRequests(long userId) {
