@@ -18,8 +18,7 @@ public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
     @Autowired
-    public ItemClient(@Value("${shareit-server.url}") String serverUrl,
-                      RestTemplateBuilder builder) {
+    public ItemClient(@Value("${shareIt-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
@@ -28,9 +27,10 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> addItem(Long userId, ItemDto itemDto) {
-        return post("", userId, itemDto);
+    public ResponseEntity<Object> addItem(Long userId, ItemDto item) {
+        return post("", userId, item);
     }
+
 
     public ResponseEntity<Object> updateItem(Long userId, Long itemId, ItemDto itemDto) {
         return patch("/" + itemId, userId, itemDto);

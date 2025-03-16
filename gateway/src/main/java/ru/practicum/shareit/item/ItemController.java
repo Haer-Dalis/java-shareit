@@ -25,7 +25,6 @@ public class ItemController {
     public ResponseEntity<Object> addItem(
             @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
             @Valid @RequestBody ItemDto itemDto) {
-        log.info("Пользователь {} добавляет предмет: {}", userId, itemDto.getId());
         return itemClient.addItem(userId, itemDto);
     }
 
