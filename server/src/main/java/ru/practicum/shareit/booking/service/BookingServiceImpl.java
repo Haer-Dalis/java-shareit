@@ -37,71 +37,27 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingOutputDto addBooking(Integer userId, BookingDto bookingDto) {
-        log.info("Начало метода addBooking. Переданный userId: {}, itemId: {}", userId, bookingDto.getItemId());
-
+        log.info("Переданный userId: {}, itemId: {}", userId, bookingDto.getItemId());
         if (bookingDto.getItemId() == null) {
-            log.error("Ошибка валидации: itemId не может быть null");
             throw new ValidationException("itemId не может не существовать");
         }
-
-        log.info("Поиск предмета с id: {}", bookingDto.getItemId());
         Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> {
-                    log.error("Ошибка: предмет с id {} не найден", bookingDto.getItemId());
-                    return new NotFoundException("Предмет с id " + bookingDto.getItemId() + " не найден");
-                });
-
-        log.info("Поиск пользователя с id: {}", userId);
+                .orElseThrow(() -> new NotFoundException("Предмет с id " + bookingDto.getItemId() + " не найден"));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.error("Ошибка: пользователь с id {} не найден", userId);
-                    return new NotFoundException("Пользователь с id " + userId + " не найден");
-                });
-
-        log.info("Проверка доступности предмета '{}': {}", item.getName(), item.getAvailable());
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         if (!item.getAvailable()) {
-            log.error("Ошибка валидации: предмет '{}' недоступен для бронирования", item.getName());
             throw new ValidationException(String.format("Айтем %s не может быть бронирован", item.getName()));
         }
-
-        log.info("Проверка владельца предмета. Владелец item: {}, Пользователь: {}",
-                item.getOwner() != null ? item.getOwner().getId() : "null", user.getId());
-
-        if (item.getOwner() == null) {
-            log.error("Ошибка: предмет с id {} не имеет владельца", item.getId());
-            throw new ValidationException("Предмет не привязан к владельцу");
-        }
-
         if (user.getId().equals(item.getOwner().getId())) {
-            log.error("Ошибка: пользователь {} пытается забронировать свою же вещь", userId);
             throw new NotFoundException("Вы пытаетесь забронировать вещь, которая Вам принадлежит!");
         }
-
-        log.info("Создание объекта бронирования...");
         Booking booking = BookingMapper.toBooking(bookingDto);
-
-        log.info("Даты бронирования. Начало: {}, Окончание: {}", booking.getStart(), booking.getEnd());
-
-        if (booking.getStart() == null || booking.getEnd() == null) {
-            log.error("Ошибка: даты бронирования не заданы. Start: {}, End: {}", booking.getStart(), booking.getEnd());
-            throw new ValidationException("Даты бронирования не могут быть null");
-        }
-
         if (booking.getStart().isAfter(booking.getEnd()) || booking.getStart().isEqual(booking.getEnd())) {
-            log.error("Ошибка валидации: Дата окончания брони неверна. Start: {}, End: {}",
-                    booking.getStart(), booking.getEnd());
-            throw new ValidationException("Дата окончания брони неверна");
+            throw new ValidationException("Дата окончания брони не может быть раньше или совпадать с датой начала");
         }
-
         booking.setItem(item);
         booking.setBooker(user);
-
-        log.info("Сохранение бронирования в базе данных...");
-        Booking savedBooking = bookingRepository.save(booking);
-
-        log.info("Бронирование успешно сохранено с id: {}", savedBooking.getId());
-
-        return BookingMapper.toBookingOutDto(savedBooking);
+        return BookingMapper.toBookingOutDto(bookingRepository.save(booking));
     }
 
     @Override
