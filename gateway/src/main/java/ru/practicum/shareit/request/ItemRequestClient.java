@@ -14,7 +14,6 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 @Slf4j
 @Service
 public class ItemRequestClient extends BaseClient {
-
     private static final String API_PREFIX = "/requests";
 
     @Autowired
@@ -27,19 +26,8 @@ public class ItemRequestClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> addRequest(Long userId, ItemRequestDto itemRequestDto) {
-        log.info("Передача запроса в client. userId: {}, DTO: {}", userId, itemRequestDto);
-
-        if (userId == null) {
-            throw new IllegalArgumentException("userId не должен быть null (client)");
-        }
-
-        try {
-            return post("", userId, itemRequestDto);
-        } catch (Exception e) {
-            log.error("Ошибка в addRequest (client). userId: {}, DTO: {}", userId, itemRequestDto, e);
-            throw new RuntimeException("Ошибка в клиенте при добавлении запроса", e);
-        }
+    public ResponseEntity<Object> addRequest(long userId, ItemRequestDto item) {
+        return post("", userId, item);
     }
 
     public ResponseEntity<Object> getRequests(Long userId) {

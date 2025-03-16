@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,23 +21,9 @@ public class ItemRequestController {
     private final ItemRequestClient itemRequestClient;
 
     @PostMapping
-    public ResponseEntity<Object> addRequest(@RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
-                                             @RequestBody ItemRequestDto itemRequestDto) {
-        log.info("Пользователь с id {} добавил запрос бронирования", userId);
-
-        if (userId == null) {
-            throw new IllegalArgumentException("userId не должен быть null");
-        }
-        if (itemRequestDto == null) {
-            throw new IllegalArgumentException("itemRequestDto не должен быть null");
-        }
-
-        try {
-            return itemRequestClient.addRequest(userId, itemRequestDto);
-        } catch (Exception e) {
-            log.error("Ошибка в addRequest (контроллер). userId: {}, DTO: {}", userId, itemRequestDto, e);
-            throw new RuntimeException("Ошибка при добавлении запроса в контроллере", e);
-        }
+    public ResponseEntity<Object> createItemRequest(@Valid @RequestBody ItemRequestDto itemRequestDto,
+                                                    @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId) {
+        return itemRequestClient.addRequest(userId, itemRequestDto);
     }
 
     @GetMapping

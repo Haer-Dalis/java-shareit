@@ -37,15 +37,8 @@ public class BaseClient {
         return post(path, null, null, body);
     }
 
-    protected <T> ResponseEntity<Object> post(String path, Long userId, T body) {
-        log.info("Вызов post. path: {}, userId: {}, body: {}", path, userId, body);
-
-        try {
-            return post(path, userId, null, body);
-        } catch (Exception e) {
-            log.error("Ошибка в post. path: {}, userId: {}, body: {}", path, userId, body, e);
-            throw new RuntimeException("Ошибка при выполнении post-запроса", e);
-        }
+    protected <T> ResponseEntity<Object> post(String path, long userId, T body) {
+        return post(path, userId, null, body);
     }
 
     protected <T> ResponseEntity<Object> post(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
