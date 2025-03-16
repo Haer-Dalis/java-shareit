@@ -34,8 +34,8 @@ public class ItemRequestController {
         try {
             return itemRequestClient.addRequest(userId, itemRequestDto);
         } catch (Exception e) {
-            log.error("Ошибка в addRequest (контроллер). userId: {}, DTO: {}", userId, itemRequestDto, e);
-            throw new RuntimeException("Ошибка при добавлении запроса в контроллере", e);
+            throw new RuntimeException(
+                    String.format("Ошибка в addRequest (контроллер). userId=%d, DTO=%s", userId, itemRequestDto), e);
         }
     }
 

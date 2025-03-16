@@ -40,10 +40,6 @@ public class BaseClient {
     protected <T> ResponseEntity<Object> post(String path, Long userId, T body) {
         log.info("Вызов post. path: {}, userId: {}, body: {}", path, userId, body);
 
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("path не должен быть пустым");
-        }
-
         try {
             return post(path, userId, null, body);
         } catch (Exception e) {

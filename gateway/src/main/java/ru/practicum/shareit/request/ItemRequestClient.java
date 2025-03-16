@@ -37,8 +37,8 @@ public class ItemRequestClient extends BaseClient {
         try {
             return post("", userId, itemRequestDto);
         } catch (Exception e) {
-            log.error("Ошибка в addRequest (client). userId: {}, DTO: {}", userId, itemRequestDto, e);
-            throw new RuntimeException("Ошибка в клиенте при добавлении запроса", e);
+            throw new RuntimeException(
+                    String.format("Ошибка в addRequest (client). userId=%d, DTO=%s", userId, itemRequestDto), e);
         }
     }
 
