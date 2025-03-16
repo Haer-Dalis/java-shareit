@@ -24,13 +24,12 @@ public class ItemRequestController {
     @PostMapping
     public ItemRequestOutputDto addRequest(@RequestHeader(SHARER_ID_HEADER) Long userId,
                                            @RequestBody ItemRequestDto itemRequestDto) {
-        try {
-            log.info("Полученное DTO: {}", itemRequestDto);
-            Integer userIdInt = Math.toIntExact(userId);
-            return itemRequestService.addRequest(itemRequestDto, userIdInt);
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка в addRequest (Server Controller): " + e.getMessage());
-        }
+        log.info("Полученный запрос в Server Service: userId={}, requestDto={}", userId, itemRequestDto);
+        Integer userIdInt = Math.toIntExact(userId);
+        log.info("Преобразованный userId: {}", userIdInt);
+        ItemRequestOutputDto result = itemRequestService.addRequest(itemRequestDto, userIdInt);
+        log.info("Запрос обработан успешно Server Service: {}", result);
+        return result;
     }
 
     @GetMapping

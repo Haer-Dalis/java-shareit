@@ -3,6 +3,7 @@ package ru.practicum.shareit.client;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,6 +13,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 public class BaseClient {
     protected final RestTemplate rest;
 
@@ -36,7 +38,10 @@ public class BaseClient {
     }
 
     protected <T> ResponseEntity<Object> post(String path, long userId, T body) {
-        return post(path, userId, null, body);
+        log.info("Вызов метода post. path={}, userId={}, body={}", path, userId, body);
+        ResponseEntity<Object> response = post(path, userId, null, body);
+        log.info("Результат метода post: {}", response);
+        return response;
     }
 
     protected <T> ResponseEntity<Object> post(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
