@@ -29,8 +29,9 @@ public class BaseClient {
     }
 
     protected <T, R> ResponseEntity<T> postBooking(String path, long userId, R body, Class<T> responseType) {
+        log.info("Запрос postBooking: path={}, userId={}, body={}", path, userId, body);
         ResponseEntity<T> response = makeAndSendRequest(HttpMethod.POST, path, userId, null, body, responseType);
-        log.info("Результат postBooking post: {}", response);
+        log.info("Результат postBooking post: статус={}, тело={}", response.getStatusCode(), response.getBody());
         return response;
     }
 
