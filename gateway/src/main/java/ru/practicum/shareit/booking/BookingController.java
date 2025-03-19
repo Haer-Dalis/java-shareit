@@ -2,58 +2,55 @@ package ru.practicum.shareit.booking;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.HeaderConstants;
-import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 
-import java.util.List;
-
-@Slf4j
-@Validated
-@RestController
-@RequestMapping("/bookings")
+@Controller
+@RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
+    private static final String HEADER_USER_PARAMETER = "X-Sharer-User-Id";
+
     private final BookingClient bookingClient;
 
     @GetMapping
-    public List<BookingOutputDto> getBookings(
-            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
-            @RequestParam(name = "state", defaultValue = "ALL") String stateParam) {
+    public ResponseEntity<Object> getBookings(@RequestHeader(HEADER_USER_PARAMETER) long userId,
+                                              @RequestParam(name = "state", defaultValue = "ALL") String stateParam) {
+        BookingState state = BookingState.from(stateParam)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
         return bookingClient.getBookings(userId, stateParam);
     }
 
     @PostMapping
-    public BookingOutputDto createBooking(
-            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
+    public ResponseEntity<Object> createBooking(
+            @RequestHeader(HEADER_USER_PARAMETER) long userId,
             @RequestBody @Valid CreateBookingDto requestDto) {
-        log.info("Создание бронирования: userId={}, requestDto={}", userId, requestDto);
-        log.info("(Конотроллер) Переданный itemId={}", requestDto.getItemId());
         return bookingClient.createBooking(userId, requestDto);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingOutputDto processBooking(
-            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
+    ResponseEntity<Object> processBooking(
+            @RequestHeader(HEADER_USER_PARAMETER) Long userId,
             @PathVariable Long bookingId,
             @RequestParam Boolean approved) {
         return bookingClient.processBooking(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
-    public BookingOutputDto getBooking(
-            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
+    public ResponseEntity<Object> getBooking(
+            @RequestHeader(HEADER_USER_PARAMETER) long userId,
             @PathVariable Long bookingId) {
         return bookingClient.getBooking(userId, bookingId);
     }
 
     @GetMapping("/owner")
-    public List<BookingOutputDto> findByOwner(
-            @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long ownerId,
+    ResponseEntity<Object> findByOwner(
+            @RequestHeader(HEADER_USER_PARAMETER) Long ownerId,
             @RequestParam(defaultValue = "ALL") BookingState state) {
         return bookingClient.findByOwner(ownerId, state);
     }

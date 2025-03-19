@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -8,16 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.client.BaseClient;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Service
 public class BookingClient extends BaseClient {
 
@@ -34,29 +30,25 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public BookingOutputDto getBooking(Long userId, Long bookingId) {
-        ResponseEntity<BookingOutputDto> response = getBooking("/" + bookingId, userId);
-        log.info("Получено booking для пользователя (клиент) {}: {}", userId, response.getBody());
-        return response.getBody();
+    public ResponseEntity<Object> getBooking(Long userId, Long bookingId) {
+        return get("/" + bookingId, userId);
     }
 
-    public BookingOutputDto createBooking(long userId, CreateBookingDto requestDto) {
-        ResponseEntity<BookingOutputDto> response = postBooking("", userId, requestDto);
-        log.info("Создано booking для пользователя (клиент) {}: {}", userId, response.getBody());
-        return response.getBody();
+    public ResponseEntity<Object> getBookings(Long userId, String state) {
+        return get("?state=" + state, userId);
     }
 
-    public List<BookingOutputDto> getBookings(Long userId, String state) {
-        return getList("?state=" + state, userId, BookingOutputDto.class).getBody();
+    public ResponseEntity<Object> createBooking(long userId, CreateBookingDto requestDto) {
+        return post("", userId, requestDto);
     }
 
-    public BookingOutputDto processBooking(Long userId, Long bookingId, Boolean approved) {
+    public ResponseEntity<Object> processBooking(Long userId, Long bookingId, Boolean approved) {
         Map<String, Object> params = new HashMap<>();
         params.put("approved", approved);
-        return patchBooking("/" + bookingId + "?approved={approved}", userId, params).getBody();
+        return patch("/" + bookingId + "?approved={approved}", userId, params, null);
     }
 
-    public List<BookingOutputDto> findByOwner(long ownerId, BookingState state) {
-        return getList("/owner?state=" + state.name(), ownerId, BookingOutputDto.class).getBody();
+    public ResponseEntity<Object> findByOwner(long ownerId, BookingState state) {
+        return get("/owner?state=" + state.name(), ownerId);
     }
 }

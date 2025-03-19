@@ -4,14 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestOutputDto;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -28,22 +26,22 @@ public class ItemRequestClient extends BaseClient {
         );
     }
 
-    public ItemRequestOutputDto addRequest(long userId, ItemRequestDto item) {
+    public ResponseEntity<Object> addRequest(long userId, ItemRequestDto item) {
         log.info("Отправка запроса в Service: userId={}, item={}", userId, item);
-        ItemRequestOutputDto response = postRequest("", userId, item).getBody();
+        ResponseEntity<Object> response = post("", userId, item);
         log.info("Ответ от сервера в Service: {}", response);
         return response;
     }
 
-    public List<ItemRequestOutputDto> getAllRequests(long userId) {
-        return getList("", userId, ItemRequestOutputDto.class).getBody();
+    public ResponseEntity<Object> getAllRequests(long userId) {
+        return get("", userId);
     }
 
-    public List<ItemRequestOutputDto> getAllByUser(long userId) {
-        return getList("/all", userId, ItemRequestOutputDto.class).getBody();
+    public ResponseEntity<Object> getAllByUser(long userId) {
+        return get("/all", userId);
     }
 
-    public ItemRequestOutputDto getItemRequest(long userId, long requestId) {
-        return getItemRequest("/" + requestId, userId).getBody();
+    public ResponseEntity<Object> getItemRequest(long userId, long requestId) {
+        return get("/" + requestId, userId);
     }
 }
