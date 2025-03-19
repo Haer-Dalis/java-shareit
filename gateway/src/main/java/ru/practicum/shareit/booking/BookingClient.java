@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class BookingClient extends BaseClient {
 
@@ -32,25 +34,29 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<BookingOutputDto> getBooking(Long userId, Long bookingId) {
-        return get("/" + bookingId, userId, BookingOutputDto.class);
+    public BookingOutputDto getBooking(Long userId, Long bookingId) {
+        ResponseEntity<BookingOutputDto> response = getBooking("/" + bookingId, userId, BookingOutputDto.class);
+        log.info("Получено booking для пользователя (клиент) {}: {}", userId, response.getBody());
+        return response.getBody();
     }
 
-    public ResponseEntity<List<BookingOutputDto>> getBookings(Long userId, String state) {
-        return getList("?state=" + state, userId, BookingOutputDto.class);
+    public BookingOutputDto createBooking(long userId, CreateBookingDto requestDto) {
+        ResponseEntity<BookingOutputDto> response = postBooking("", userId, requestDto, BookingOutputDto.class);
+        log.info("Создано booking для пользователя (клиент) {}: {}", userId, response.getBody());
+        return response.getBody();
     }
 
-    public ResponseEntity<BookingOutputDto> createBooking(long userId, CreateBookingDto requestDto) {
-        return post("", userId, requestDto, BookingOutputDto.class);
+    public List<BookingOutputDto> getBookings(Long userId, String state) {
+        return getList("?state=" + state, userId, BookingOutputDto.class).getBody();
     }
 
-    public ResponseEntity<BookingOutputDto> processBooking(Long userId, Long bookingId, Boolean approved) {
+    public BookingOutputDto processBooking(Long userId, Long bookingId, Boolean approved) {
         Map<String, Object> params = new HashMap<>();
         params.put("approved", approved);
-        return patch("/" + bookingId + "?approved={approved}", userId, params, null, BookingOutputDto.class);
+        return patch("/" + bookingId + "?approved={approved}", userId, params, null, BookingOutputDto.class).getBody();
     }
 
-    public ResponseEntity<List<BookingOutputDto>> findByOwner(long ownerId, BookingState state) {
-        return getList("/owner?state=" + state.name(), ownerId, BookingOutputDto.class);
+    public List<BookingOutputDto> findByOwner(long ownerId, BookingState state) {
+        return getList("/owner?state=" + state.name(), ownerId, BookingOutputDto.class).getBody();
     }
 }

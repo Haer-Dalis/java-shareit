@@ -22,14 +22,14 @@ public class BookingController {
     public List<BookingOutputDto> getBookings(
             @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
             @RequestParam(name = "state", defaultValue = "ALL") String stateParam) {
-        return bookingClient.getBookings(userId, stateParam).getBody();
+        return bookingClient.getBookings(userId, stateParam);
     }
 
     @PostMapping
     public BookingOutputDto createBooking(
             @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
             @RequestBody @Valid CreateBookingDto requestDto) {
-        return bookingClient.createBooking(userId, requestDto).getBody();
+        return bookingClient.createBooking(userId, requestDto);
     }
 
     @PatchMapping("/{bookingId}")
@@ -37,20 +37,20 @@ public class BookingController {
             @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long userId,
             @PathVariable Long bookingId,
             @RequestParam Boolean approved) {
-        return bookingClient.processBooking(userId, bookingId, approved).getBody();
+        return bookingClient.processBooking(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public BookingOutputDto getBooking(
             @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
             @PathVariable Long bookingId) {
-        return bookingClient.getBooking(userId, bookingId).getBody();
+        return bookingClient.getBooking(userId, bookingId);
     }
 
     @GetMapping("/owner")
     public List<BookingOutputDto> findByOwner(
             @RequestHeader(HeaderConstants.SHARER_ID_HEADER) Long ownerId,
             @RequestParam(defaultValue = "ALL") BookingState state) {
-        return bookingClient.findByOwner(ownerId, state).getBody();
+        return bookingClient.findByOwner(ownerId, state);
     }
 }

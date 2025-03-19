@@ -22,6 +22,18 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.GET, path, userId, null, null, responseType);
     }
 
+    protected <T> ResponseEntity<T> getBooking(String path, long userId, Class<T> responseType) {
+        ResponseEntity<T> response = makeAndSendRequest(HttpMethod.GET, path, userId, null, null, responseType);
+        log.info("GET Booking request to {} for user {} returned: {}", path, userId, response);
+        return response;
+    }
+
+    protected <T, R> ResponseEntity<T> postBooking(String path, long userId, R body, Class<T> responseType) {
+        ResponseEntity<T> response = makeAndSendRequest(HttpMethod.POST, path, userId, null, body, responseType);
+        log.info("Результат postBooking post: {}", response);
+        return response;
+    }
+
     protected <T> ResponseEntity<List<T>> getList(String path, long userId, Class<T> responseType) {
         return makeAndSendRequest(HttpMethod.GET, path, userId, null, null, new ParameterizedTypeReference<List<T>>() {});
     }
