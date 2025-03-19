@@ -41,7 +41,7 @@ public class BookingClient extends BaseClient {
     }
 
     public BookingOutputDto createBooking(long userId, CreateBookingDto requestDto) {
-        ResponseEntity<BookingOutputDto> response = postBooking("", userId, requestDto, BookingOutputDto.class);
+        ResponseEntity<BookingOutputDto> response = postBooking("", userId, requestDto);
         log.info("Создано booking для пользователя (клиент) {}: {}", userId, response.getBody());
         return response.getBody();
     }

@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CreateBookingDto {
 
-    @NotNull
     private Long itemId;
 
     @NotNull

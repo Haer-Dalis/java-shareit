@@ -6,6 +6,9 @@ import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.shareit.booking.dto.BookingOutputDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemOutputDto;
 
 import java.util.List;
 import java.util.Map;
@@ -22,15 +25,19 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.GET, path, userId, null, null, responseType);
     }
 
+    protected <T> ResponseEntity<ItemOutputDto> getItem(String path, long userId) {
+        return makeAndSendRequest(HttpMethod.GET, path, userId, null, null, ItemOutputDto.class);
+    }
+
     protected <T> ResponseEntity<T> getBooking(String path, long userId, Class<T> responseType) {
         ResponseEntity<T> response = makeAndSendRequest(HttpMethod.GET, path, userId, null, null, responseType);
         log.info("GET Booking request to {} for user {} returned: {}", path, userId, response);
         return response;
     }
 
-    protected <T, R> ResponseEntity<T> postBooking(String path, long userId, R body, Class<T> responseType) {
+    protected <R> ResponseEntity<BookingOutputDto> postBooking(String path, long userId, R body) {
         log.info("Запрос postBooking: path={}, userId={}, body={}", path, userId, body);
-        ResponseEntity<T> response = makeAndSendRequest(HttpMethod.POST, path, userId, null, body, responseType);
+        ResponseEntity<BookingOutputDto> response = makeAndSendRequest(HttpMethod.POST, path, userId, null, body, BookingOutputDto.class);
         log.info("Результат postBooking post: статус={}, тело={}", response.getStatusCode(), response.getBody());
         return response;
     }
@@ -39,8 +46,16 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.GET, path, userId, null, null, new ParameterizedTypeReference<List<T>>() {});
     }
 
+    protected ResponseEntity<List<ItemDto>> getListItems(String path, long userId) {
+        return makeAndSendRequest(HttpMethod.GET, path, userId, null, null, new ParameterizedTypeReference<List<ItemDto>>() {});
+    }
+
     protected <T, R> ResponseEntity<T> post(String path, long userId, R body, Class<T> responseType) {
         return makeAndSendRequest(HttpMethod.POST, path, userId, null, body, responseType);
+    }
+
+    protected <R> ResponseEntity<ItemDto> postItem(String path, long userId, R body) {
+        return makeAndSendRequest(HttpMethod.POST, path, userId, null, body, ItemDto.class);
     }
 
     protected <T, R> ResponseEntity<T> post(String path, long userId, @Nullable Map<String, Object> parameters, R body, Class<T> responseType) {
@@ -49,6 +64,10 @@ public class BaseClient {
 
     protected <T, R> ResponseEntity<T> patch(String path, long userId, @Nullable Map<String, Object> parameters, R body, Class<T> responseType) {
         return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, body, responseType);
+    }
+
+    protected <R> ResponseEntity<ItemDto> patchItem(String path, long userId, @Nullable Map<String, Object> parameters, R body) {
+        return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, body, ItemDto.class);
     }
 
     protected ResponseEntity<Void> delete(String path, long userId) {

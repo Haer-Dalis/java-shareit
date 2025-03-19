@@ -31,19 +31,19 @@ public class ItemClient extends BaseClient {
 
 
     public ItemDto addItem(long userId, ItemDto itemDto) {
-        return post("", userId, itemDto, ItemDto.class).getBody();
+        return postItem("", userId, itemDto).getBody();
     }
 
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
-        return patch("/" + itemId, userId, null, itemDto, ItemDto.class).getBody();
+        return patchItem("/" + itemId, userId, null, itemDto).getBody();
     }
 
     public ItemOutputDto getItem(long userId, long itemId) {
-        return get("/" + itemId, userId, ItemOutputDto.class).getBody();
+        return getItem("/" + itemId, userId).getBody();
     }
 
     public List<ItemDto> getAllItems(long userId) {
-        return getList("", userId, ItemDto.class).getBody();
+        return getListItems("", userId).getBody();
     }
 
     public List<ItemDto> searchItems(String text) {

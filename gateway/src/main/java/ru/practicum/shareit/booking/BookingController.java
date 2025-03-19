@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.HeaderConstants;
@@ -11,6 +12,7 @@ import ru.practicum.shareit.booking.dto.CreateBookingDto;
 
 import java.util.List;
 
+@Slf4j
 @Validated
 @RestController
 @RequestMapping("/bookings")
@@ -29,6 +31,8 @@ public class BookingController {
     public BookingOutputDto createBooking(
             @RequestHeader(HeaderConstants.SHARER_ID_HEADER) long userId,
             @RequestBody @Valid CreateBookingDto requestDto) {
+        log.info("Создание бронирования: userId={}, requestDto={}", userId, requestDto);
+        log.info("(Конотроллер) Переданный itemId={}", requestDto.getItemId());
         return bookingClient.createBooking(userId, requestDto);
     }
 
