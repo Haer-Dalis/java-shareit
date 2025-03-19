@@ -32,30 +32,25 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public BookingOutputDto getBooking(Long userId, Long bookingId) {
-        ResponseEntity<Object> response = get("/" + bookingId, userId);
-        return (BookingOutputDto) response.getBody();
+    public ResponseEntity<BookingOutputDto> getBooking(Long userId, Long bookingId) {
+        return get("/" + bookingId, userId, BookingOutputDto.class);
     }
 
-    public List<BookingOutputDto> getBookings(Long userId, String state) {
-        ResponseEntity<Object> response = get("?state=" + state, userId);
-        return (List<BookingOutputDto>) response.getBody();
+    public ResponseEntity<List<BookingOutputDto>> getBookings(Long userId, String state) {
+        return getList("?state=" + state, userId, BookingOutputDto.class);
     }
 
-    public BookingOutputDto createBooking(long userId, CreateBookingDto requestDto) {
-        ResponseEntity<Object> response = post("", userId, requestDto);
-        return (BookingOutputDto) response.getBody();
+    public ResponseEntity<BookingOutputDto> createBooking(long userId, CreateBookingDto requestDto) {
+        return post("", userId, requestDto, BookingOutputDto.class);
     }
 
-    public BookingOutputDto processBooking(Long userId, Long bookingId, Boolean approved) {
+    public ResponseEntity<BookingOutputDto> processBooking(Long userId, Long bookingId, Boolean approved) {
         Map<String, Object> params = new HashMap<>();
         params.put("approved", approved);
-        ResponseEntity<Object> response = patch("/" + bookingId + "?approved={approved}", userId, params, null);
-        return (BookingOutputDto) response.getBody();
+        return patch("/" + bookingId + "?approved={approved}", userId, params, null, BookingOutputDto.class);
     }
 
-    public List<BookingOutputDto> findByOwner(long ownerId, BookingState state) {
-        ResponseEntity<Object> response = get("/owner?state=" + state.name(), ownerId);
-        return (List<BookingOutputDto>) response.getBody();
+    public ResponseEntity<List<BookingOutputDto>> findByOwner(long ownerId, BookingState state) {
+        return getList("/owner?state=" + state.name(), ownerId, BookingOutputDto.class);
     }
 }
