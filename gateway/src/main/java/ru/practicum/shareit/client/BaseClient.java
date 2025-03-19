@@ -55,11 +55,7 @@ public class BaseClient {
     }
 
     protected <T, R> ResponseEntity<T> postUser(String path, R body, Class<T> responseType) {
-        return postUser(path, null, null, body, responseType);
-    }
-
-    protected <T, R> ResponseEntity<T> postUser(String path, Long userId, @Nullable Map<String, Object> parameters, R body, Class<T> responseType) {
-        return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body, responseType);
+        return makeAndSendRequest(HttpMethod.POST, path, null, null, body, responseType);
     }
 
     protected <T, R> ResponseEntity<T> patchUser(String path, long userId, R body, Class<T> responseType) {

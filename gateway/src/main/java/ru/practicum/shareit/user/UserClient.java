@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 public class UserClient extends BaseClient {
-    private static final String API_PREFIX = "";
+    private static final String API_PREFIX = "/users";
 
     @Autowired
     public UserClient(@Value("${shareit-server.url}") String serverUrl,
