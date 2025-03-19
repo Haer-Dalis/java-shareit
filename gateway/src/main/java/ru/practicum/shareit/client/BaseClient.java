@@ -79,7 +79,7 @@ public class BaseClient {
             }
         } catch (HttpStatusCodeException e) {
             log.error("Error while executing request: {}", e.getMessage());
-            return ResponseEntity.status(e.getStatusCode()).body(null);
+            return ResponseEntity.status(e.getStatusCode()).body((T) e.getResponseBodyAsByteArray());
         }
     }
 

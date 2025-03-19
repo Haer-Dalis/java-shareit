@@ -26,4 +26,10 @@ public class ErrorHandler {
     public ErrorResponse handleNotValid(final AccessDeniedException error) {
         return new ErrorResponse(error.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictError(final ConflictException error) {
+        return new ErrorResponse(error.getMessage());
+    }
 }
