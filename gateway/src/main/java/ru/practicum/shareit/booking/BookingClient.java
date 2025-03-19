@@ -35,7 +35,7 @@ public class BookingClient extends BaseClient {
     }
 
     public BookingOutputDto getBooking(Long userId, Long bookingId) {
-        ResponseEntity<BookingOutputDto> response = getBooking("/" + bookingId, userId, BookingOutputDto.class);
+        ResponseEntity<BookingOutputDto> response = getBooking("/" + bookingId, userId);
         log.info("Получено booking для пользователя (клиент) {}: {}", userId, response.getBody());
         return response.getBody();
     }
@@ -53,7 +53,7 @@ public class BookingClient extends BaseClient {
     public BookingOutputDto processBooking(Long userId, Long bookingId, Boolean approved) {
         Map<String, Object> params = new HashMap<>();
         params.put("approved", approved);
-        return patch("/" + bookingId + "?approved={approved}", userId, params, null, BookingOutputDto.class).getBody();
+        return patchBooking("/" + bookingId + "?approved={approved}", userId, params).getBody();
     }
 
     public List<BookingOutputDto> findByOwner(long ownerId, BookingState state) {

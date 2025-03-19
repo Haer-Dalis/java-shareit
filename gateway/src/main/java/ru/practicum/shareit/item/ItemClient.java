@@ -51,7 +51,7 @@ public class ItemClient extends BaseClient {
     }
 
     public CommentOutputDto createComment(long userId, long itemId, CommentDto commentDto) {
-        return post("/" + itemId + "/comment", userId, commentDto, CommentOutputDto.class).getBody();
+        return postComment("/" + itemId + "/comment", userId, commentDto).getBody();
     }
 }
 

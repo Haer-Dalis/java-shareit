@@ -30,7 +30,7 @@ public class ItemRequestClient extends BaseClient {
 
     public ItemRequestOutputDto addRequest(long userId, ItemRequestDto item) {
         log.info("Отправка запроса в Service: userId={}, item={}", userId, item);
-        ItemRequestOutputDto response = post("", userId, item, ItemRequestOutputDto.class).getBody();
+        ItemRequestOutputDto response = postRequest("", userId, item).getBody();
         log.info("Ответ от сервера в Service: {}", response);
         return response;
     }
@@ -44,6 +44,6 @@ public class ItemRequestClient extends BaseClient {
     }
 
     public ItemRequestOutputDto getItemRequest(long userId, long requestId) {
-        return get("/" + requestId, userId, ItemRequestOutputDto.class).getBody();
+        return getItemRequest("/" + requestId, userId).getBody();
     }
 }

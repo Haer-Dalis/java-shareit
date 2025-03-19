@@ -27,19 +27,19 @@ public class UserClient extends BaseClient {
     }
 
     public UserDto addUser(UserDto userDto) {
-        return postUser("", userDto, UserDto.class).getBody();
+        return postUser("", userDto).getBody();
     }
 
     public UserDto updateUser(Long userId, UserDto userDto) {
-        return patchUser("/" + userId, userId, userDto, UserDto.class).getBody();
+        return patchUser("/" + userId, userId, userDto).getBody();
     }
 
     public UserDto deleteUser(Long userId) {
-        return deleteUs("/" + userId, UserDto.class).getBody();
+        return deleteUs("/" + userId).getBody();
     }
 
     public UserDto getUser(Long userId) {
-        return get("/" + userId, userId, UserDto.class).getBody();
+        return getUser("/" + userId, userId).getBody();
     }
 
     public List<UserDto> getAllUsers() {
