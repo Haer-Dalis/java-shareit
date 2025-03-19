@@ -27,11 +27,11 @@ public class UserClient extends BaseClient {
     }
 
     public UserDto addUser(UserDto userDto) {
-        return post("", 0L, userDto, UserDto.class).getBody();
+        return postUser("", userDto, UserDto.class).getBody();
     }
 
     public UserDto updateUser(Long userId, UserDto userDto) {
-        return patch("/" + userId, userId, null, userDto, UserDto.class).getBody();
+        return patchUser("/" + userId, userId, userDto, UserDto.class).getBody();
     }
 
     public UserDto deleteUser(Long userId) {

@@ -54,6 +54,22 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.DELETE, path, null, null, null, responseType);
     }
 
+    protected <T, R> ResponseEntity<T> postUser(String path, R body, Class<T> responseType) {
+        return postUser(path, null, null, body, responseType);
+    }
+
+    protected <T, R> ResponseEntity<T> postUser(String path, Long userId, @Nullable Map<String, Object> parameters, R body, Class<T> responseType) {
+        return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body, responseType);
+    }
+
+    protected <T, R> ResponseEntity<T> patchUser(String path, long userId, R body, Class<T> responseType) {
+        return patchUser(path, userId, null, body, responseType);
+    }
+
+    protected <T, R> ResponseEntity<T> patchUser(String path, Long userId, @Nullable Map<String, Object> parameters, R body, Class<T> responseType) {
+        return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, body, responseType);
+    }
+
     private <T, R> ResponseEntity<T> makeAndSendRequest(HttpMethod method, String path, Long userId,
                                                         @Nullable Map<String, Object> parameters,
                                                         @Nullable R body, Class<T> responseType) {
