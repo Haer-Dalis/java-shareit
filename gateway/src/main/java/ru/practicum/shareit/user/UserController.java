@@ -13,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 @Validated
-@Controller
+@RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
