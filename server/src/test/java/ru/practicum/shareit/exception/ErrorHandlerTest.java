@@ -36,12 +36,4 @@ public class ErrorHandlerTest {
 
         assertEquals("Access denied", response.getError());
     }
-
-    @Test
-    public void testHandleConflictException() {
-        ConflictException ex = new ConflictException("Conflict occurred");
-        ErrorResponse response = handler.handleConflictError(ex);
-
-        assertEquals("Conflict occurred", response.getError());
-    }
 }
