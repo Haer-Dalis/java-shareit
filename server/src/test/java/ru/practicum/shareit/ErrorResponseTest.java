@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 public class ErrorResponseTest {
 
-    ErrorResponse errorResponse;
-    String error = "textError";
+    private ErrorResponse errorResponse;
+    private String error = "textError";
 
     @Test
     void errorResponse() {
